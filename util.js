@@ -146,3 +146,103 @@ var cat = exports.cat = function(){
 var construct = exports.construct = function(head,tail){
     return cat([head],_.toArray(tail));
 }
+
+
+var finder = exports.finder = function(getValue,chooseBestValue,collection){
+    return _.reduce(collection,function(best,cureent){
+        var bestValue = getValue(best);
+        var currentValue = getValue(current);
+        return (bestValue === chooseBestValue(bestValue,currentValue) ? best : current);
+    });
+}
+
+
+/**
+    tighten finder up a bit:
+    1. chooseBestValue function returns true if the first argument is betterthan the second one.
+    2. the chooseBestValue function knows how to 'unwrap' its arguments
+*/
+
+var best = exports.best = function(func,collection){
+    return _.reduce(collection,function(best,current){
+        return func(best,current) ? best ； current;
+    });
+}
+
+
+var repeat = exports.repeat = function(times,VALUE){
+    return _.map(_.range(times),function(value){
+        return VALUE;
+    });
+}
+
+// use functions ,not values
+
+var repeatedly = exports.repeatedly = function(times,func){
+    return _.map(_.range(times),func);
+}
+
+//we do not know how many times to literate.but we know the condition to stop literate;
+//and we can also feed-forward the result of the previous function to the next function to call.
+
+var literateUntil = exports.literateUntil = function(perform,check,initState){
+    var ret = [];
+    var result = perform(initState);
+    while(check(result)){
+       ret.push(result);
+       result = perform(result);
+    }
+}
+
+//a function that always return a contant;
+
+var always = exports.always = function(VALUE){
+    return function(){
+        return VALUE;
+    }
+}
+
+
+var invoker = exports.invoker = function(NAME,METHOD){
+    return function(target /**arguments for the method*/){
+        if( !existy(target) ) fail("invoker: you must supply a target to call method of"); 
+        var targetMethod = target[NAME];
+        var args = _.rest(arguments);
+        return doWhen(targetMethod === METHOD,function(){
+            return targetMethod.apply(target,args);
+        }); 
+    }
+}
+
+
+var fnull = exports.fnull = function(func){
+    var defaults = _.rest(arguments);
+    return function(){
+        var args = _.toArray(arguments);
+        var params = _.reduce(defaluts,function(result,item,index){
+            if(existy(args[index])){
+                return result;
+            }else{
+                args[index] = item;
+                return args;
+            }
+        },args); 
+        return func.apply(func,params);
+    }
+}
+
+//invoke every function given on the obj,and returns an array of errors;
+
+var checker = exports.checker = function(/*functions for checking*/){
+    var validators= _.toArray(arguments);
+    return function(obj){
+        _.reduce(validators,function(error,validator){
+            if(validator(obj)){
+                return error;
+            }else{
+                return _.chain(error).push(validator.message).value();
+            }
+        },[]);
+    }
+}
+
