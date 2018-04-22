@@ -246,3 +246,21 @@ var checker = exports.checker = function(/*functions for checking*/){
     }
 }
 
+//form polymorpic functions;
+//exhibit different behaviors based on their arguments;
+
+var dispatch = exports.dispatch = function(/**funcs*/){
+    var funcs = _.toArray(arguments);
+    var size = funcs.length;
+    return function(obj/**args*/){
+      var result = undefined;
+      var args = _.rest(arguments);
+      for(var i=0;i<size;i++){
+        result = func[i].apply(obj,args);
+        //result = func[i].apply(func[i],construct(obj,args));
+        if(existy(result)) 
+            return result;
+      }
+      return return;
+    }
+}
